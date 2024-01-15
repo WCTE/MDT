@@ -1,6 +1,6 @@
 #include "TrueHit.h"
 
-TrueHit::TrueHit(float t, int id)
+TrueHit::TrueHit(double t, int id)
 {
     fTime = t;
     fParentId = id;

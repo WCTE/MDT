@@ -12,7 +12,7 @@ class WCRootDataIDNuInt : public WCRootDataNuInt
         WCRootDataIDNuInt();
         virtual ~WCRootDataIDNuInt();
 
-        void LoadFiles(const char*);
+        void LoadFiles(const char*, const std::vector<string> &v=vector<string>());
         void SetInteractionInformation(PileUpSpill_t*) const;
 
     private :

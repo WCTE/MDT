@@ -27,7 +27,7 @@ class WCRootDataPileUpSpill : public WCRootData
 
         // For writing 
        // void SetOutFilePrefix(const char *f){ fOutFilePrefix = TString(f); }
-        void CreateTree(const char *f=0);
+        void CreateTree(const char *f=0, const vector<string> &v=vector<string>());
         void FillTree();
         void WriteTree();
         void AddInteraction(const WCRootDataNuInt*, float offset_time=0., int bunch_id=99999);

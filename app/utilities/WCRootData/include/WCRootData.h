@@ -61,12 +61,26 @@ class WCRootData
         TChain *fWCSimC;
         TTree *fWCSimT;
         vector<WCSimRootEvent*> fSpEvt;
+        vector<bool> isOD;
         WCSimRootGeom *fWCGeom;
 
         Float_t fDetCentreY;
 
         float fHitTimeOffset;
         bool fMultDigiHits;
+
+        TTree *fWCSimDigiWFT;
+        std::vector<TClonesArray*> fDigiWF;
+        // TClonesArray* fDigiWF;
+        // TClonesArray* fDigiWF2;
+        // TClonesArray* fDigiWFOD;
+        bool fSaveWF;
+
+        TTree *fWCSimDigiPulls;
+        float fPullQ;
+        float fPullT;
+        float fTrueQ;
+        float fTrueT;
 
     private:
 		void SetTubes(HitTubeCollection*, const int);

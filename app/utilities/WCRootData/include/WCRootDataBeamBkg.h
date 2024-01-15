@@ -11,7 +11,7 @@ class WCRootDataBeamBkg : public WCRootDataNuInt
         WCRootDataBeamBkg();
         virtual ~WCRootDataBeamBkg();
 
-        void LoadFiles(const char *);
+        void LoadFiles(const char *, const std::vector<string> &v=vector<string>());
         float GetEnergyDepositionInOD() const { return fEdepoOD; }
 
     private :

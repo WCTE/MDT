@@ -2,7 +2,7 @@
 
 WCRootDataIDNuInt::WCRootDataIDNuInt()
 {
-    fHasFriend = true;
+    fHasFriend = false;
     fNuIntType = eIDNuInt;
 };
 
@@ -10,10 +10,12 @@ WCRootDataIDNuInt::~WCRootDataIDNuInt()
 {
 }
 
-void WCRootDataIDNuInt::LoadFiles(const char *filename)
+void WCRootDataIDNuInt::LoadFiles(const char *filename, const vector<string> &list)
 {
     // Read input file list of WCSim first
-    this->WCRootDataNuInt::LoadFiles(filename);
+    this->WCRootDataNuInt::LoadFiles(filename,list);
+
+    if (!fHasFriend) return;
 
     ifstream fin(filename);
     string aLine;

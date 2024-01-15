@@ -17,10 +17,12 @@ using std::vector;
 class TriggerAlgo
 {
     public:
-        TriggerAlgo();
+        TriggerAlgo(const string &s="");
         virtual ~TriggerAlgo(){};
 
+        void DoTrigger(HitTubeCollection*, TriggerInfo*);
         void NDigits(HitTubeCollection*, TriggerInfo*);
+        void NoTrig(HitTubeCollection*, TriggerInfo*);
         float GetTriggerTimeForFailure() const { return fTriggerTimeForFailure; }
 
     private:       
@@ -31,4 +33,9 @@ class TriggerAlgo
         float fNDigitsWindow;
         float fNDigitsStepSize;
         int   fNDigitsThreshold;
+        TriggerType fTriggerType;
+
+        static const double fLongTime;      ///< An arbitrary long time to use in loops (ns)
+
+        string fPMTType;
 };

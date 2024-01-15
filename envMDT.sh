@@ -27,7 +27,7 @@ if [ -n "${MDTROOT}" ] ; then
 		drop_from_path "$LD_LIBRARY_PATH" "${old_mdtroot}/cpp"
 		LD_LIBRARY_PATH=$newpath
 
-		drop_from_path "$LD_LIBRARY_PATH" "${WCSIMDIR}"
+		drop_from_path "$LD_LIBRARY_PATH" "${WCSIMROOTDIR}"
 		LD_LIBRARY_PATH=$newpath
 
 		drop_from_path "$LD_LIBRARY_PATH" "${WCRDROOT}"
@@ -64,24 +64,18 @@ if [[ -z "${WCSIMDIR}" ]]; then
 	return 
 else
 	echo "Using WCSIM installed in $WCSIMDIR"
-	export LD_LIBRARY_PATH=${WCSIMDIR}:$LD_LIBRARY_PATH
+	#export LD_LIBRARY_PATH=${WCSIMDIR}:$LD_LIBRARY_PATH
+
+	if [[ -z "${WCSIMROOTDIR}" ]]; then
+		WCSIMROOTDIR=$WCSIMDIR
+	fi
+	echo "Using libWCSimRoot.so installed in $WCSIMROOTDIR"
+	export LD_LIBRARY_PATH=${WCSIMROOTDIR}:$LD_LIBRARY_PATH
 fi
 
 #--- MDT's utility
 export WCRDROOT=$MDTROOT/app/utilities/WCRootData
 export LD_LIBRARY_PATH=${WCRDROOT}:$LD_LIBRARY_PATH
-
-#--- Option to read hybrid WCSIM files
-if [[ -z "${HYBRIDWCSIM}" ]]; then
-	echo "HYBRIDWCSIM not set. Default to 0"
-	export HYBRIDWCSIM=0
-elif [[ $HYBRIDWCSIM -eq 0 ]]; then
-	echo "HYBRIDWCSIM set to 0"
-	export HYBRIDWCSIM=0
-else
-	echo "HYBRIDWCSIM set to 1"
-	export HYBRIDWCSIM=1
-fi
 
 echo "Setup complete!"
 echo "MDTROOT=$MDTROOT"

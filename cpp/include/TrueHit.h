@@ -3,11 +3,11 @@
 class TrueHit
 {
     public:
-        TrueHit(float t, int id=999999999);
+        TrueHit(double t, int id=999999999);
         TrueHit();
         virtual ~TrueHit();
 
-        float GetTime() const { return fTime; }
+        double GetTime() const { return fTime; }
         float GetParentId() const { return fParentId; }
         float GetPosition(int i) const { return fPosition[i]; }
         float GetDirection(int i) const { return fDirection[i]; }
@@ -24,7 +24,7 @@ class TrueHit
         void SetPosBin(int i, int b){ fBin[i] = b; }
 
     private:
-        float fTime;
+        double fTime;
         float fPosition[3]; // Hit position on photocade
         float fDirection[3]; // Direction of photon hitting photocathode
         float fStartTime; // Photon track initial time

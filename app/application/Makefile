@@ -7,7 +7,7 @@ CXXFLAGS += -Wall -std=c++11 -g $(shell root-config --cflags)\
 			-I${WCRDROOT}/include
 
 LDFLAGS += $(shell root-config --ldflags) $(shell root-config --libs) -lTreePlayer\
-		   -L$(WCSIMDIR) -lWCSimRoot\
+		   -L$(WCSIMROOTDIR) -lWCSimRoot\
 		   -L${MDTROOT}/cpp -lMDT\
 		   -L${WCRDROOT} -lWCRData
 
@@ -18,9 +18,23 @@ appWCTESingleEvent: appWCTESingleEvent.o PMTResponse3inchR12199_02.o
 	$(LD) $^ $(LDFLAGS) -o $@
 	@echo "$@ done"
 
+appIWCDSingleEvent: appIWCDSingleEvent.o PMTResponse3inchR12199_02.o
+	$(RM) $@
+	$(LD) $^ $(LDFLAGS) -o $@
+	@echo "$@ done"
+
+appGenPileUpSpill: appGenPileUpSpill.o PMTResponse3inchR12199_02.o
+	$(RM) $@
+	$(LD) $^ $(LDFLAGS) -o $@
+	@echo "$@ done"
 
 %o::%cc
 	$(CXX) $(CXXFLAGS) -c $? -o $@
 
+all: appWCTESingleEvent appIWCDSingleEvent appGenPileUpSpill
+
 clean:
 	$(RM) *.o
+	$(RM) -f appWCTESingleEvent
+	$(RM) -f appIWCDSingleEvent
+	$(RM) -f appGenPileUpSpill
