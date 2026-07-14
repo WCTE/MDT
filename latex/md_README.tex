@@ -1,0 +1,89 @@
+C++ Stand-\/alone library for Merging, Digitizing, and Triggering hits of photomultiplier tubes (PMTs) based on \href{https://github.com/WCSim/WCSim}{\texttt{ WCSim}}. A Python interface is optionally provided, requiring pre-\/installation of \href{https://pybind11.readthedocs.io/en/stable/installing.html}{\texttt{ pybind11}}.
+
+The library provides C++ classes that manage three tasks\+:
+
+
+\begin{DoxyItemize}
+\item Merging true hits (simulated photoelectrons by WCSim) of an events with those of any number of events
+\begin{DoxyItemize}
+\item Intrinsic dark noise can be added during this stage
+\end{DoxyItemize}
+\item Digitizing true hits
+\begin{DoxyItemize}
+\item Timing and charge of a digitized hit is simulated by a simple model used in WCSim
+\item The library is capable of accomodating alternative models
+\item Parameters describing PMT charcteristics such as timing resolution can be varied
+\item Digitized hits by PMT afterpusing can be added
+\end{DoxyItemize}
+\item Triggering digitized hits
+\begin{DoxyItemize}
+\item A simple algorithm that counts number of digitized hits falling in a sliding time winodw
+\item Selectable trigger window and thershold
+\end{DoxyItemize}
+\end{DoxyItemize}
+
+For details, check \mbox{\hyperlink{md_doc_MDT}{doc/\+MDT.md}}.\hypertarget{md_README_autotoc_md17}{}\doxysection{WCTE/\+WCSim usage}\label{md_README_autotoc_md17}
+Simple runtime procedures. First set up your ROOT and WCSIM\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{source your\_thisroot.sh}
+\DoxyCodeLine{source your\_this\_wcsim.sh \# or just export WCSIM\_BUILD\_DIR}
+
+\end{DoxyCode}
+ Then set up the MDT environment. 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{source envMDT.sh}
+\DoxyCodeLine{cd \$MDTROOT/cpp; make clean; make all}
+\DoxyCodeLine{cd \$MDTROOT/app/utilities/WCRootData; make clean; make all}
+\DoxyCodeLine{cd \$MDTROOT/app/application; make clean; make all}
+\DoxyCodeLine{cd \$MDTROOT}
+\DoxyCodeLine{\# edit variables properly in run\_test\_mdt4wcte.sh}
+\DoxyCodeLine{bash run\_test\_mdt4wcte.sh}
+
+\end{DoxyCode}
+\hypertarget{md_README_autotoc_md18}{}\doxysection{IWCD usage}\label{md_README_autotoc_md18}
+Essentially the same usage but with OD support. 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\# edit variables properly in run\_test\_mdt4iwcd.sh}
+\DoxyCodeLine{bash run\_test\_mdt4iwcd.sh}
+
+\end{DoxyCode}
+\hypertarget{md_README_autotoc_md19}{}\doxysection{IWCD pile-\/up generation}\label{md_README_autotoc_md19}
+Example usage 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\$MDTROOT/app/application/appGenPileUpSpill \$MDTROOT/example/genPileUpConfig.txt}
+
+\end{DoxyCode}
+ The application generates pile-\/up events by combining ID neutrino interaction events and beam background events in a spill.
+
+Input variables are\+:
+\begin{DoxyItemize}
+\item {\ttfamily List\+IDNu\+Int\+Files},{\ttfamily List\+Beam\+Bkg\+Files}\+: list of WCSim output files for the ID and background events
+\item {\ttfamily Out\+File\+Name\+Prefix}\+: output file name will be something like \char`\"{}\+Out\+File\+Name\+Prefix\char`\"{}.00000.\+root
+\item {\ttfamily MDTPar\+File}\+: MDT config file
+\item {\ttfamily Initial\+Seed}\+: Random seed
+\item {\ttfamily IDNu\+Int\+Rate},{\ttfamily Beam\+Bkg\+Rate}\+: Mean number of ID and background events per spill. In each spill, the actual number of interactions are drawn from a Poisson distribution, and interaction timing according to the bunch structure (see {\ttfamily \mbox{\hyperlink{classBeamTiming}{Beam\+Timing}}} class under {\ttfamily app/utilities/\+WCRoot\+Data/})
+\item {\ttfamily Use\+OD}\+: Process OD hits
+\item {\ttfamily Num\+Of\+Spills\+Saved\+Per\+File}, {\ttfamily Total\+Num\+Of\+Spills}\+: output spill setup
+\end{DoxyItemize}\hypertarget{md_README_autotoc_md20}{}\doxysection{How to simulate and access digitized pulses}\label{md_README_autotoc_md20}
+Turn on waveform simulation in the parameter file by {\ttfamily $<$ Digitizer\+Type\+\_\+\+PMTType = 1 $>$}.
+
+For each true hit, a digitized waveform is simulated by sampling the single PE pulse (defined by the {\ttfamily $<$ Waveform\+File $>$} parameter) every 8 ns with 0.\+1 resolution. If there is another PE arriving within the hit integration window, the waveforms are added.
+
+To do pulse fitting, the hit finding algorithm \href{https://github.com/hyperk/MDT/issues/8}{\texttt{ here}} is implemented to calculate the digitized time and charge.
+
+Optionally, the waveform and digi TQ pulls of the first pulse of each PMT in each event can be saved by setting {\ttfamily $<$ Save\+Waveform = 1 $>$}. To read the pulses, 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{// open the file and get the digitzed waveform tree}
+\DoxyCodeLine{TTree* wcsimDigiWFTree = (TTree*)f-\/>Get("{}wcsimDigiWFTree"{});}
+\DoxyCodeLine{TClonesArray *arr = new TClonesArray("{}TH1F"{});}
+\DoxyCodeLine{wcsimDigiWFTree-\/>GetBranch("{}wcsimrootevent\_waveform"{})-\/>SetAutoDelete(kFALSE);}
+\DoxyCodeLine{wcsimDigiWFTree-\/>SetBranchAddress("{}wcsimrootevent\_waveform"{},\&arr);}
+\DoxyCodeLine{// In each event, each array index corresponds to PMTId-\/1 (from 0 to nPMTs-\/1)}
+\DoxyCodeLine{wcsimDigiWFTree-\/>GetEntry(0); // EvtId}
+\DoxyCodeLine{TH1F* h = (TH1F*)arr-\/>At(0); // PMTId-\/1}
+\DoxyCodeLine{// Time and charge pulls of digitized hits}
+\DoxyCodeLine{TTree* WCSimDigiPulls = (TTree*)f-\/>Get("{}WCSimDigiPulls"{});}
+\DoxyCodeLine{WCSimDigiPulls-\/>Scan("{}PullT:TrueT:PullQ:TrueQ:EvtId:PMTId"{},"{}PullT>-\/99"{}); // Pull==-\/99 means no digi hit for this PMT in this event}
+
+\end{DoxyCode}
+ 
