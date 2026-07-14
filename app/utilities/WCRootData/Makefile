@@ -1,12 +1,9 @@
 CXX=g++
 LD=g++
 
-CXXFLAGS += -Wall -O2 -std=c++11 -g -fPIC -I./include $(shell root-config --cflags) -I$(WCSIMDIR)/include -I${MDTROOT}/cpp/include
-ifeq ($(HYBRIDWCSIM),1)
-CXXFLAGS += -DHYBRIDWCSIM
-endif
+CXXFLAGS += -Wall -O2 -std=c++11 -g -fPIC -I./include $(shell root-config --cflags) -I$(WCSIM_BUILD_DIR)/include/WCSim -I${MDTROOT}/cpp/include
 #LDFLAGS += -shared $(shell root-config --ldflags) $(shell root-config --libs) -lTreePlayer -lMinuit2 -L$(WCSIMDIR) -lWCSimRoot -L${MDTROOT}/cpp -lMDT
-LDFLAGS += -shared $(shell root-config --ldflags) $(shell root-config --libs) -L$(WCSIMDIR) -lWCSimRoot -L${MDTROOT}/cpp -lMDT
+LDFLAGS += -shared $(shell root-config --ldflags) $(shell root-config --libs) -L$(WCSIM_BUILD_DIR)/lib -lWCSimRoot -L${MDTROOT}/cpp -lMDT
 
 TARGET=libWCRData.so
 

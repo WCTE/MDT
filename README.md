@@ -14,19 +14,66 @@ The library provides C++ classes that manage three tasks:
     - A simple algorithm that counts number of digitized hits falling in a sliding time winodw
     - Selectable trigger window and thershold
 
+For details, check [doc/MDT.md](doc/MDT.md).
+
 ## WCTE/WCSim usage
 Simple runtime procedures. First set up your ROOT and WCSIM:
 ```
 source your_thisroot.sh
-export WCSIMDIR=your_WCSIM_installation
+source your_this_wcsim.sh # or just export WCSIM_BUILD_DIR
 ```
 Then set up the MDT environment.
 ```
 source envMDT.sh
 cd $MDTROOT/cpp; make clean; make all
 cd $MDTROOT/app/utilities/WCRootData; make clean; make all
-cd $MDTROOT/app/application; make appWCTESingleEvent
+cd $MDTROOT/app/application; make clean; make all
 cd $MDTROOT
 # edit variables properly in run_test_mdt4wcte.sh
 bash run_test_mdt4wcte.sh
+```
+
+## IWCD usage
+Essentially the same usage but with OD support.
+```
+# edit variables properly in run_test_mdt4iwcd.sh
+bash run_test_mdt4iwcd.sh
+```
+
+## IWCD pile-up generation
+Example usage
+```
+$MDTROOT/app/application/appGenPileUpSpill $MDTROOT/example/genPileUpConfig.txt
+```
+The application generates pile-up events by combining ID neutrino interaction events and beam background events in a spill. 
+
+Input variables are:
+- `ListIDNuIntFiles`,`ListBeamBkgFiles`: list of WCSim output files for the ID and background events
+- `OutFileNamePrefix`: output file name will be something like "OutFileNamePrefix".00000.root
+- `MDTParFile`: MDT config file
+- `InitialSeed`: Random seed
+- `IDNuIntRate`,`BeamBkgRate`: Mean number of ID and background events per spill. In each spill, the actual number of interactions are drawn from a Poisson distribution, and interaction timing according to the bunch structure (see `BeamTiming` class under `app/utilities/WCRootData/`)
+- `UseOD`: Process OD hits
+- `NumOfSpillsSavedPerFile`, `TotalNumOfSpills`: output spill setup
+
+## How to simulate and access digitized pulses
+Turn on waveform simulation in the parameter file by `< DigitizerType_PMTType = 1 >`.
+
+For each true hit, a digitized waveform is simulated by sampling the single PE pulse (defined by the `< WaveformFile >` parameter) every 8 ns with 0.1 resolution. If there is another PE arriving within the hit integration window, the waveforms are added. 
+
+To do pulse fitting, the hit finding algorithm [here](https://github.com/hyperk/MDT/issues/8) is implemented to calculate the digitized time and charge.
+
+Optionally, the waveform and digi TQ pulls of the first pulse of each PMT in each event can be saved by setting `< SaveWaveform = 1 >`. To read the pulses,
+```
+// open the file and get the digitzed waveform tree
+TTree* wcsimDigiWFTree = (TTree*)f->Get("wcsimDigiWFTree");
+TClonesArray *arr = new TClonesArray("TH1F");
+wcsimDigiWFTree->GetBranch("wcsimrootevent_waveform")->SetAutoDelete(kFALSE);
+wcsimDigiWFTree->SetBranchAddress("wcsimrootevent_waveform",&arr);
+// In each event, each array index corresponds to PMTId-1 (from 0 to nPMTs-1)
+wcsimDigiWFTree->GetEntry(0); // EvtId
+TH1F* h = (TH1F*)arr->At(0); // PMTId-1
+// Time and charge pulls of digitized hits
+TTree* WCSimDigiPulls = (TTree*)f->Get("WCSimDigiPulls");
+WCSimDigiPulls->Scan("PullT:TrueT:PullQ:TrueQ:EvtId:PMTId","PullT>-99"); // Pull==-99 means no digi hit for this PMT in this event
 ```

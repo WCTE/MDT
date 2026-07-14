@@ -22,6 +22,8 @@
 #include "TrueHit.h"
 using std::vector;
 
+#include "TH1F.h"
+
 class HitTube
 {
     public: 
@@ -29,6 +31,10 @@ class HitTube
         virtual ~HitTube();
         void SetTubeID(const int i){ fTubeID = i; }
         int GetTubeID() const { return fTubeID; }
+        void SetmPMTID(const int i){ fmPMTID = i; }
+        int GetmPMTID() const { return fmPMTID; } 
+        void SetmPMT_PMTID(const int i){ fmPMT_PMTID = i; }
+        int GetmPMT_PMTID() const { return fmPMT_PMTID; } 
 		float GetPosition(int i) const { return fPosition[i]; }
 		float GetOrientation(int i) const { return fOrientation[i]; }
 		void SetPosition(int i, float f) { fPosition[i] = f; }
@@ -70,16 +76,40 @@ class HitTube
         float GetChargeDigi(const int i) const { return fChargeDigi[i]; }
         const vector<int>& GetParentCompositionDigi(const int i) const { return fParentCompDigi[i]; }
 
+        void SetDigiWF(const TH1F& hist)
+        {
+            if(hDigiWF != nullptr) delete hDigiWF;
+            hDigiWF = new TH1F(hist);
+            hDigiWF->SetDirectory(0);
+        }
+        TH1F* GetDigiWF()
+        {
+            return hDigiWF;
+        }
+        void SetDigiPulls(float pullT, float pullQ) { fPullT = pullT; fPullQ = pullQ;}
+        void SetTrueTQ(float trueT, float trueQ) { fTrueT = trueT; fTrueQ = trueQ;}
+        float GetPullT() {return fPullT;}
+        float GetPullQ() {return fPullQ;}
+        float GetTrueT() {return fTrueT;}
+        float GetTrueQ() {return fTrueQ;}
         
     private:
         int fNRawPE;
         vector<TrueHit*> fPhotoElectrons;
 
         int fTubeID;
+        int fmPMTID;
+        int fmPMT_PMTID;
         int fNDigiHits;
 		float fPosition[3];
 		float fOrientation[3];
         vector<float> fTimeDigi;
         vector<float> fChargeDigi;
         vector<vector<int>> fParentCompDigi;
+
+        TH1F* hDigiWF;
+        float fPullT; 
+        float fPullQ;
+        float fTrueT; 
+        float fTrueQ;
 };

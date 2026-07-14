@@ -145,6 +145,11 @@ int PMTNoise::GetNumberOfGeneratedDarkHits() const
 
 void PMTNoise::AddPhotoElectrons(HitTubeCollection* hc)
 {
+    // Get correct PMT numbers each time
+    fNPMTs = hc->GetHitTubeIDList().size();
+    fMinTubeID = 0;
+    fMaxTubeID = fNPMTs-1;
+
     vector< pair<double, double> > range;
     if( fDarkMode==1 )
     {
@@ -218,10 +223,12 @@ void PMTNoise::FindRanges(HitTubeCollection *hc, vector<pair<double, double>> &r
 void PMTNoise::Add(HitTubeCollection *hc, double tWinLow, double tWinUp)
 {
     this->GenerateDarkNoise(tWinLow, tWinUp, true, false);
+    // Get correct tubeID matching
+    const vector<int>& hitTubeIDList = hc->GetHitTubeIDList();
     const int nDarkHits = this->GetNumberOfGeneratedDarkHits();
     for(int k=0; k<nDarkHits; k++)
     {
-        int tubeID = this->GetNoiseTube(k);
+        int tubeID = hitTubeIDList.at(this->GetNoiseTube(k));
         float time = this->GetNoiseTime(k); 
 		hc->AddTrueHit(tubeID, time, -1);
     }

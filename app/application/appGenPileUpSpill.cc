@@ -10,6 +10,9 @@
 #include "WCRootDataPileUpSpill.h"
 #include "BeamTiming.h"
 
+// PMT type used for 3-inch PMTs of IWCD/WCTE
+#include "PMTResponse3inchR12199_02.h"
+
 std::string fInFileTextIDNuInt = "";
 std::string fInFileTextBeamBkg = "";
 std::string fOutFileNamePrefix = "";
@@ -19,11 +22,19 @@ int fNumOfSpillsPerFile = 1000;
 float fIDNuIntRate = 3.5;
 float fBeamBkgRate = 7.5;
 int fTotalNumofSpills = 10000;
+int fUseOD = 0;
 
 void ReadConfiguration(const char*);
 
 int main(int argc, char **argv)
 {
+    if (argc==1)
+    {
+        std::cout<<" ** Please specify input config file ** "<<std::endl;
+        std::cout<<" ** Usage: appGenPileUpSpill config_file ** "<<std::endl;
+        return 0;
+    }
+
     std::string ConfigFileName = argv[1];
     ReadConfiguration(argv[1]);
 
@@ -39,8 +50,20 @@ int main(int argc, char **argv)
     const int seed_beamtiming = rndm->Integer(1000000);
     delete rndm; rndm = 0;
 
+    // IWCD PMT type for ID and OD
+    int NPMTType = !fUseOD ? 1 : 2 ;
+    vector<string> fPMTType(NPMTType);
+    fPMTType[0] = "PMT3inchR12199_02";
+    if (fUseOD>0) fPMTType[1] = "PMT3inchR12199_02_OD";
+
     // Will be manaing marging true hits and digitizing merged true hits
     MDTManager *MDT = new MDTManager(seed_mdt);
+    MDT->RegisterPMTType(fPMTType[0], new PMTResponse3inchR12199_02());
+    if (fUseOD) MDT->RegisterPMTType(fPMTType[1], new PMTResponse3inchR12199_02());
+
+    vector<string> listWCRootEvt(NPMTType);
+    listWCRootEvt[0] = "wcsimrootevent";
+    if (fUseOD) listWCRootEvt[1] = "wcsimrootevent_OD";
 
     // Manage input files for ID interactions 
     WCRootDataIDNuInt *daIDNuInt = new WCRootDataIDNuInt();
@@ -56,12 +79,13 @@ int main(int argc, char **argv)
     daBeamBkg->SetSeed(seed_beambkg);
 
     // Will be used to extract file ID number
-    daIDNuInt->SetNDigitsFileIDNumber(5);
-    daBeamBkg->SetNDigitsFileIDNumber(6);
+    // KMTsui: I don't have it has real usage
+    // daIDNuInt->SetNDigitsFileIDNumber(5);
+    // daBeamBkg->SetNDigitsFileIDNumber(6);
 
     // Load input files from text file
-    daIDNuInt->LoadFiles(fInFileTextIDNuInt.c_str());
-    daBeamBkg->LoadFiles(fInFileTextBeamBkg.c_str());
+    daIDNuInt->LoadFiles(fInFileTextIDNuInt.c_str(),listWCRootEvt);
+    daBeamBkg->LoadFiles(fInFileTextBeamBkg.c_str(),listWCRootEvt);
 
     // Set number of ID interactions per spill
     daIDNuInt->SetInteractionRate(fIDNuIntRate);
@@ -80,7 +104,7 @@ int main(int argc, char **argv)
     daPileUp->SetFileNameForCopyTree(daIDNuInt->GetCurrentInputFileName());
 
     // Create output file. Its name will be something like "OutFileNamePrefix".00000.root
-    daPileUp->CreateTree(fOutFileNamePrefix.c_str());
+    daPileUp->CreateTree(fOutFileNamePrefix.c_str(),listWCRootEvt);
 
     float nuIntTime; // interaction time
     int nuIntBunch;  // bunch id number 
@@ -107,7 +131,8 @@ int main(int argc, char **argv)
             bt->DrawInteractionTime(nuIntTime, nuIntBunch);
             
             // Add true hits of this interaction to MDT
-            daIDNuInt->AddTrueHitsToMDT(MDT, nuIntTime);
+            for(int k=0; k<NPMTType; k++)
+                daIDNuInt->AddTrueHitsToMDT(MDT->GetHitTubeCollection(fPMTType[k]), MDT->GetPMTResponse(fPMTType[k]), nuIntTime, k);
 
             // Add information about this interaction
             daPileUp->AddInteraction(daIDNuInt, nuIntTime, nuIntBunch);
@@ -119,18 +144,24 @@ int main(int argc, char **argv)
             daBeamBkg->Next();
 
             bt->DrawInteractionTime(nuIntTime, nuIntBunch);
-            daBeamBkg->AddTrueHitsToMDT(MDT, nuIntTime);
+            for(int k=0; k<NPMTType; k++)
+                daBeamBkg->AddTrueHitsToMDT(MDT->GetHitTubeCollection(fPMTType[k]), MDT->GetPMTResponse(fPMTType[k]), nuIntTime, k);
             daPileUp->AddInteraction(daBeamBkg, nuIntTime, nuIntBunch);
         }
 
         // Now all the true hits have been merged into one spill
         // Add dark noise hits, and then make digitized hits
-        MDT->DoAddDark();
-        MDT->DoDigitize();
-        MDT->DoTrigger();
+        for(int j=0; j<NPMTType; j++)
+        {
+            MDT->DoAddDark(fPMTType[j]);
+            MDT->DoDigitize(fPMTType[j]);
+            MDT->DoTrigger(fPMTType[j]);
+
+            // Add the resultant digitized hits to the output
+            TriggerInfo *ti = MDT->GetTriggerInfo(fPMTType[j]);
+            daPileUp->AddDigiHits(MDT->GetHitTubeCollection(fPMTType[j]), ti, i, j);
+        }
  
-        // Add the resultant digitized hits to the output
-        daPileUp->AddDigiHits(MDT);
         daPileUp->FillTree();
 
         // Clear all the true and digitized hits of this spill for the next spill
@@ -162,5 +193,6 @@ void ReadConfiguration(const char *filename)
     Conf->GetValue<float>("IDNuIntRate", fIDNuIntRate);
     Conf->GetValue<float>("BeamBkgRate", fBeamBkgRate);
     Conf->GetValue<int>("TotalNumOfSpills", fTotalNumofSpills);
+    Conf->GetValue<int>("UseOD", fUseOD);
     Conf->Finalize();
 }

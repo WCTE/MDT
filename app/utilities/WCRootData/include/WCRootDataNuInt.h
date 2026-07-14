@@ -22,7 +22,7 @@ class WCRootDataNuInt : public WCRootData
         virtual ~WCRootDataNuInt();
 
         void SetSeed(const int i){ fRnd->SetSeed(i); }
-        void LoadFiles(const char*); 
+        void LoadFiles(const char*, const std::vector<string> &v=vector<string>()); 
         virtual bool Next();
 
         void SetNDigitsFileIDNumber(int i){ fNDigitsFileIdNum = i; }
@@ -35,6 +35,8 @@ class WCRootDataNuInt : public WCRootData
         unsigned GetInteractionType() const { return fNuIntType; }
         virtual float GetEnergyDepositionInOD() const { return 0.; }
         virtual void SetInteractionInformation(PileUpSpill_t*) const {};
+
+        void SetHasFriend(bool val) {fHasFriend=val;}
 
     protected:
         int GetFileIdNumber(const char*, const char *prefix="wcsim.");
@@ -58,5 +60,6 @@ class WCRootDataNuInt : public WCRootData
         int fFileIdNum; 
         int fNDigitsFileIdNum;
         float fIntRate;
+        std::vector<string> fWCRootEvtList;
 };
 #endif

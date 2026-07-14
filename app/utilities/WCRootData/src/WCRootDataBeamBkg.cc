@@ -2,7 +2,7 @@
 
 WCRootDataBeamBkg::WCRootDataBeamBkg()
 {
-    fHasFriend = true;
+    fHasFriend = false;
     fNuIntType = eBeamBkg;
 };
 
@@ -10,10 +10,12 @@ WCRootDataBeamBkg::~WCRootDataBeamBkg()
 {
 }
 
-void WCRootDataBeamBkg::LoadFiles(const char *filename)
+void WCRootDataBeamBkg::LoadFiles(const char *filename, const vector<string> &list)
 {
     // Read input file list of WCSim first
-    this->WCRootDataNuInt::LoadFiles(filename);
+    this->WCRootDataNuInt::LoadFiles(filename,list);
+
+    if (!fHasFriend) return;
 
     ifstream fin(filename);
     string aLine;

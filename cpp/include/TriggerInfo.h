@@ -14,7 +14,11 @@ using std::cout;
 using std::endl;
 using std::vector;
 
-enum class TriggerType : int { eNDigits=0,
+enum class TriggerType : int { eUndefined = -1,
+                               eNDigits,
+                               eNDigitsTest,
+                               eTestVertices,
+                               eNoTrig,
                                eFailure};
 
 class TriggerInfo

@@ -1,0 +1,49 @@
+# Parameter setting 
+
+# Trigger setting
+< NDigitsThreshold_PMT3inchR12199_02 = 25 >
+< NDigitsStepSize_PMT3inchR12199_02 = 5 >
+< NDigitsPostTriggerWindow_PMT3inchR12199_02 = +950. >
+< NDigitsPreTriggerWindow_PMT3inchR12199_02 = -400. >
+< FailurePostTriggerWindow_PMT3inchR12199_02 = +950. > # seems to be +950 by default //+100000.
+< FailurePreTriggerWindow_PMT3inchR12199_02 = -400. >
+< FailureTime_PMT3inchR12199_02 = 100. >
+< NDigitsWindow_PMT3inchR12199_02 = 200. >
+< TriggerType_PMT3inchR12199_02 = NDigits >
+< TriggerType_PMT3inchR12199_02_OD = NoTrig >
+
+# Dark noise setting
+< DarkAddMode_PMT3inchR12199_02 = 1 > 
+< DarkRate_PMT3inchR12199_02 = 0.0 > // kHz
+< DarkM0WindowLow_PMT3inchR12199_02 = 0. > // ns
+< DarkM0WindowUp_PMT3inchR12199_02 = 100000. > // ns
+< DarkM1Window_PMT3inchR12199_02 = 4000. > // ns
+< DarkAddMode_PMT3inchR12199_02_OD = 1 > 
+< DarkRate_PMT3inchR12199_02_OD = 0.0 > // kHz
+< DarkM0WindowLow_PMT3inchR12199_02_OD = 0. > // ns
+< DarkM0WindowUp_PMT3inchR12199_02_OD = 100000. > // ns
+< DarkM1Window_PMT3inchR12199_02_OD = 4000. > // ns
+
+# 3" PMT setting
+< TimingResConstant_PMT3inchR12199_02 = 1.890 > # TTS(FWHM) = 1ns at 1 charge
+< TimingResMinimum_PMT3inchR12199_02 = 0.58 >
+< ScalFactorTTS_PMT3inchR12199_02 = 1 >
+< SPECDFFile_PMT3inchR12199_02 = $MDTROOT/parameter/SPE_CDF_PMT3inchR12199_02.txt >
+< TimingResConstant_PMT3inchR12199_02_OD = 1.890 > # TTS(FWHM) = 1ns at 1 charge
+< TimingResMinimum_PMT3inchR12199_02_OD = 0.58 >
+< ScalFactorTTS_PMT3inchR12199_02_OD = 1 >
+< SPECDFFile_PMT3inchR12199_02_OD = $MDTROOT/parameter/SPE_CDF_PMT3inchR12199_02.txt >
+
+# Digitizer setting
+< DigiHitIntegrationWindow = 200 >  // ns
+< PrecisionTiming = 0.1 > // ns 
+< PrecisionCharge = 0. >
+< ApplyDAQEfficiency = 1 >
+
+# After pulse setting
+< APDoAdd = 0 >
+
+# Output setting
+< TimeOffset = 950. >
+< FlagMultDigits = 0 >
+

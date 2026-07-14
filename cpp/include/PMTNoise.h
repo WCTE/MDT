@@ -55,10 +55,10 @@ class PMTNoise
         int fMaxTubeID;
         float fWinLow;
         float fWinUp;
+        float fWindow;
         float fDarkRate;
         float fAveNoise;
         float fConvRate;
-        float fWindow;
         int fDarkMode;
 
         int fNnoise;

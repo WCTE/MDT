@@ -38,18 +38,24 @@ template <> int Configuration::GetValue<int>(string name)
 {
     if( this->IsAvailable(name) )
     return fMpValue[name].i;
+
+    return -999.;
 }
 
 template <> float Configuration::GetValue<float>(string name)
 {
     if( this->IsAvailable(name) )
     return fMpValue[name].f;
+
+    return -999.;
 }
 
 template <> string Configuration::GetValue<string>(string name)
 {
     if( this->IsAvailable(name) )
     return fMpValue[name].s;
+
+    return "";
 }
 
 template <> void Configuration::GetValue<int>(string name, int &t)

@@ -59,7 +59,7 @@ void WCRootDataPileUpSpill::GetOutFileIdNumber(const int i, TString &s)
     s = TString(ss.str());
 }
 
-void WCRootDataPileUpSpill::CreateTree(const char *prefix)
+void WCRootDataPileUpSpill::CreateTree(const char *prefix, const vector<string> &list)
 {
     TString sOutFileNum = "";
     this->GetOutFileIdNumber(fOutFileNum, sOutFileNum);
@@ -68,7 +68,7 @@ void WCRootDataPileUpSpill::CreateTree(const char *prefix)
     TString OutFileName = fOutFilePrefix + "." + sOutFileNum + ".root";
     std::cout<<" Creating new output file: " << OutFileName <<std::endl;
     fOutFileNum += 1;
-    this->WCRootData::CreateTree(OutFileName);
+    this->WCRootData::CreateTree(OutFileName,list);
 
     TFile *f = fWCSimT->GetCurrentFile();
     fPupSpillT = new TTree(fPupSpillTreeName, "Pile-up spill tree");
@@ -94,7 +94,10 @@ void WCRootDataPileUpSpill::FillTree()
     fPupSpillT->Fill();
     fPupSpillT->Write("", TObject::kOverwrite);
 
-    fSpEvt[0]->ReInitialize();
+    for(unsigned int i=0; i<fSpEvt.size(); i++)
+    {
+        fSpEvt[i]->ReInitialize();
+    }
     fPupSpill.Clear();
     
     fCurSpill += 1;
@@ -115,6 +118,7 @@ void WCRootDataPileUpSpill::WriteTree()
     {
         this->CopyTree(fFileNameToBeCopied, "wcsimGeoT");
         this->CopyTree(fFileNameToBeCopied, "Settings");
+        this->CopyTree(fFileNameToBeCopied, "wcsimRootOptionsT");
     }
 }
 
@@ -130,7 +134,7 @@ void WCRootDataPileUpSpill::AddInteraction(const WCRootDataNuInt *aNuInt,
     fPupSpill.EventIdNum[fPupSpill.NNuIntTot] = aNuInt->GetEventIdNumber();
     aNuInt->SetInteractionInformation(&fPupSpill);
 
-    this->AddTracks(aNuInt->GetTrigger(0), offset_time);
+    this->AddTracks(aNuInt->GetTrigger(0,0), offset_time, 0);
 
     const int iFirst = fPupSpill.NTracks;
     const int nTrackTmp = ((TClonesArray*)fSpEvt[0]->GetTrigger(0)->GetTracks())->GetEntries();
@@ -164,8 +168,8 @@ void WCRootDataPileUpSpill::AddDigiHitsToMDT(MDTManager *mdt,
        
         int tube_id = aHit->GetTubeId();
         float q = aHit->GetQ();
-        int mPMT_module_id = aHit->GetmPMTId();
-        int mPMT_pmt_id = aHit->GetmPMT_PMTId();
+        // int mPMT_module_id = aHit->GetmPMTId();
+        // int mPMT_pmt_id = aHit->GetmPMT_PMTId();
         vector<int> true_hit_ids = aHit->GetPhotonIds();
 
         if( !hc->HasTube(tube_id) )
